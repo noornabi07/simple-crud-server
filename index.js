@@ -28,15 +28,27 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    // get this code from mongodb
     const database = client.db("usersDB");
     const userConnection = database.collection("users");
 
+    // sob gula user pawar jonno code
     app.get('/users', async(req, res) =>{
         const cursor = userConnection.find();
         const result = await cursor.toArray();
         res.send(result)
     })
 
+    // update er jonno specific id diye data ber korar code
+    app.get('/users/:id', async (req, res) =>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const user = await userConnection.findOne(query);
+      res.send(user);
+    })
+
+
+    // notun user create korar code
     app.post('/users', async(req, res) =>{
         const user = req.body;
         console.log(user)
@@ -44,6 +56,24 @@ async function run() {
         res.send(result)
     })
 
+    // update er jonno code
+    app.put('/users/:id', async(req, res) =>{
+      const id = req.params.id;
+      const user = req.body;
+      console.log(user)
+      const filter = {_id: new ObjectId(id)};
+      const options = {upsert: true};
+      const updatedUser = {
+        $set : {
+          name : user.name,
+          email: user.email
+        }
+      };
+      const result = await userConnection.updateOne(filter, updatedUser, options)
+      res.send(result);
+    })
+
+    // kono user ke delete korar code
     app.delete('/users/:id', async(req, res) =>{
         const id = req.params.id;
         console.log('This is delete from database:', id);
